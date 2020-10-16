@@ -1,19 +1,11 @@
 const express = require('express')
 const fileUpload = require('express-fileupload');
 var fs = require('fs');
+var cors = require('cors');
 const app = express();
 
 app.use(fileUpload());
-
-app.get('/', (req, res) => {
-  res.writeHead(200, {'Content-Type': 'text/html'});
-  res.write('<form action="upload" method="post" enctype="multipart/form-data">');
-  res.write('<input type="file" name="sampleFile"><br>');
-  res.write('<input type="submit" value="upload">');
-  res.write('</form>');
-  return res.end();
-})
-
+app.use(cors())
 
 app.get('/list',(req,res)=>{
   
@@ -21,7 +13,13 @@ app.get('/list',(req,res)=>{
   let images = [];
     filenames.forEach((filename)=>{
       if(/\.(gif|jpe?g|tiff?|png|webp|bmp)$/i.test(filename)) {
-        images.push(filename);
+        const info = fs.statSync(filename);
+        images.push({
+          name: filename,
+          createdAt: info.birthtime,
+          updatedAt: info.atime,
+          
+        });
       }
       
     })
@@ -56,7 +54,7 @@ app.post('/upload', (req, res) => {
     if (err)
       return res.status(500).send(err);
 
-    res.send('File uploaded!');
+    res.send('File Uploaded');
   });
 });
 //configure the server port
